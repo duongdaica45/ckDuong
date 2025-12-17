@@ -13,8 +13,8 @@ services:
       MYSQL_PASSWORD: root
     volumes:
       - mysql_data:/var/lib/mysql
-    ports:
-      - "3306:3306"
+      - ./backend/sql:/docker-entrypoint-initdb.d
+
 
   # 2. Dịch vụ Backend (Laravel/PHP-FPM) - LOẠI BỎ LỆNH COMMAND
   backend:
