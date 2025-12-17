@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # 1. Dịch vụ Database (MySQL) - GIỮ NGUYÊN
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel_db
+      MYSQL_USER: danh291204
+      MYSQL_PASSWORD: root
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  # 2. Dịch vụ Backend (Laravel/PHP-FPM) - LOẠI BỎ LỆNH COMMAND
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: laravel_fpm
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - db
+    # *** BỎ DÒNG LỆNH COMMAND NẾU NÓ CÓ TỒN TẠI TRONG FILE CỦA BẠN ***
+    # Vd: (command: sh -c "composer install && php-fpm") -> XÓA DÒNG NÀY ĐỂ TRÁNH LỖI
+
+  # 3. Dịch vụ Web Server (Nginx) - GIỮ NGUYÊN
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx_server
+    volumes:
+      - ./backend:/var/www/html
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8000:80" 
+    depends_on:
+      - backend
+
+  # 4. Dịch vụ Frontend (React) - GIỮ NGUYÊN
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: react_app
+    ports:
+      - "3001:80"
+
+# Định nghĩa Volume
+volumes:
+  mysql_data:

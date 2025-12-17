@@ -1,0 +1,172 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full-Stack Demo</title>
+</head>
+<body>
+    <h1>🛒 Demo Project: Lấy Dữ Liệu Sản Phẩm</h1>
+    <div id="status">Đang tải dữ liệu từ Backend...</div>
+    <ul id="product-list"></ul>
+    
+    <script>
+        const API_URL = 'http://localhost:8000'; // Địa chỉ API Backend
+
+        async function fetchProducts() {
+            const statusDiv = document.getElementById('status');
+            const list = document.getElementById('product-list');
+            list.innerHTML = '';
+            
+            try {
+                // Gọi API Endpoint
+                const response = await fetch(API_URL);
+                const result = await response.json();
+
+                if (result.success) {
+                    statusDiv.innerHTML = `<span style='color: green;'>✅ Backend API đã phản hồi: ${result.message}</span>`;
+                    
+                    if (result.data.length === 0) {
+                        list.innerHTML = '<li>Không có sản phẩm nào.</li>';
+                        return;
+                    }
+
+                    // Hiển thị dữ liệu sản phẩm
+                    result.data.forEach(product => {
+                        const li = document.createElement('li');
+                        li.textContent = `${product.name} - $${product.price}`;
+                        list.appendChild(li);
+                    });
+                } else {
+                    statusDiv.innerHTML = `<span style='color: red;'>❌ Lỗi API: ${result.message}</span>`;
+                }
+
+            } catch (error) {
+                // Lỗi mạng hoặc CORS
+                statusDiv.innerHTML = `<span style='color: red;'>❌ Lỗi kết nối Frontend với Backend (Kiểm tra CORS hoặc Nginx): ${error.message}</span>`;
+            }
+        }
+
+        fetchProducts();
+    </script>
+</body>
+</html>
+ -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full-Stack Demo: Cart</title>
+    <style>
+        .product-item { margin-bottom: 10px; border: 1px solid #ccc; padding: 10px; }
+        .cart-link { margin-left: 20px; cursor: pointer; color: blue; text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <h1>🛒 Demo Project: Sản phẩm và Giỏ hàng</h1>
+    
+    <button onclick="fetchProducts()">Tải lại Sản phẩm</button>
+    <span class="cart-link" onclick="viewCart()">Xem Giỏ hàng (API)</span>
+
+    <div id="status">Đang tải dữ liệu sản phẩm...</div>
+    <div id="product-list"></div>
+    
+    <h2>Giỏ hàng (<span id="cart-status">Chưa tải</span>)</h2>
+    <ul id="cart-content"></ul>
+
+    <script>
+        const API_URL = 'http://localhost:8000'; 
+
+        // --- HÀM 1: Tải Sản phẩm ---
+        async function fetchProducts() {
+            const statusDiv = document.getElementById('status');
+            const list = document.getElementById('product-list');
+            list.innerHTML = '';
+            statusDiv.textContent = 'Đang tải...';
+            
+            try {
+                const response = await fetch(API_URL + '/products'); // Gọi API /products
+                const result = await response.json();
+
+                if (result.success) {
+                    statusDiv.innerHTML = `<span style='color: green;'>✅ Tải sản phẩm thành công.</span>`;
+                    
+                    result.data.forEach(product => {
+                        const div = document.createElement('div');
+                        div.className = 'product-item';
+                        div.innerHTML = `
+                            <strong>${product.name}</strong> - $${product.price} 
+                            <button onclick="addToCart(${product.id}, '${product.name}')">Thêm vào Giỏ</button>
+                        `;
+                        list.appendChild(div);
+                    });
+                } else {
+                    statusDiv.innerHTML = `<span style='color: red;'>❌ Lỗi API: ${result.message}</span>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<span style='color: red;'>❌ Lỗi kết nối API /products.</span>`;
+            }
+        }
+
+        // --- HÀM 2: Thêm vào Giỏ hàng ---
+        async function addToCart(productId, productName) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = `Đang thêm ${productName} vào giỏ...`;
+            
+            try {
+                // Giả lập cuộc gọi POST API /add-to-cart
+                const response = await fetch(API_URL + '/add-to-cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ product_id: productId, quantity: 1 })
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`${result.message}: ${productName}`);
+                    viewCart(); // Tải lại giỏ hàng sau khi thêm
+                } else {
+                    alert(`Thêm vào giỏ thất bại: ${result.message}`);
+                }
+            } catch (error) {
+                alert(`Lỗi mạng khi thêm vào giỏ: ${error.message}`);
+            }
+        }
+        
+        // --- HÀM 3: Xem Giỏ hàng ---
+        async function viewCart() {
+            const cartStatus = document.getElementById('cart-status');
+            const cartContent = document.getElementById('cart-content');
+            cartContent.innerHTML = '';
+            cartStatus.textContent = 'Đang tải...';
+
+            try {
+                const response = await fetch(API_URL + '/cart'); // Gọi API /cart
+                const result = await response.json();
+
+                if (result.success) {
+                    cartStatus.innerHTML = `<span style='color: green;'>Tải thành công.</span>`;
+                    
+                    if (result.data && result.data.length > 0) {
+                        result.data.forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = `${item.name} (Số lượng: ${item.quantity}) - $${item.price}`;
+                            cartContent.appendChild(li);
+                        });
+                    } else {
+                        cartContent.innerHTML = '<li>Giỏ hàng trống.</li>';
+                    }
+                } else {
+                    cartStatus.innerHTML = `<span style='color: red;'>Lỗi: ${result.message}</span>`;
+                }
+
+            } catch (error) {
+                cartStatus.innerHTML = `<span style='color: red;'>Lỗi kết nối API /cart.</span>`;
+            }
+        }
+
+        fetchProducts(); // Tải sản phẩm khi khởi động
+    </script>
+</body>
+</html>

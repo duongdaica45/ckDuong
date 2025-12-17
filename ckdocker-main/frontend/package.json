@@ -1,0 +1,9 @@
+{
+  "name": "shop-frontend",
+  "version": "0.1.0",
+  "scripts": {
+    "build": "mkdir -p build && echo '<h1>Web Ban Hang Don Gian (React) running on Port 3001!</h1>' > build/index.html"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

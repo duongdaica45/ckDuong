@@ -1,0 +1,14 @@
+# Ignore Docker build/runtime files
+.env
+.DS_Store
+# logs/
+
+# Ignore PHP dependencies (sẽ được Composer cài trong Dockerfile)
+/backend/vendor
+
+# Ignore MySQL data (data sẽ được lưu trong volume/container)
+/dbdata
+
+# Ignore Frontend build (nếu có, nhưng hiện tại FE chỉ là HTML tĩnh)
+/frontend/node_modules
+/frontend/dist
