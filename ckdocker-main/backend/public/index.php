@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // Cấu hình Database
 $host = 'db';
 $dbname = 'laravel_db';
-$user = 'danh291204';
+$user = 'dunne898';
 $password = 'root';
 
 // Biến giả lập Giỏ hàng (Trong môi trường thực tế, đây là DB Session)
